@@ -7,14 +7,8 @@ void Array<T>::SetSize(int size, int grow)
 	{
 		throw out_of_range ("Размер не может быть меньше 0\n");
 	}
-	if (mas.size() < size)
-	{
-		mas.resize(mas.size() + grow);
-	}
-	else if (mas.size() > size)
-	{
-		mas.resize(mas.size() - grow);
-	}
+	mas.resize(mas.size());
+	grow_size = grow;
 }
 
 template<class T>
@@ -24,7 +18,7 @@ void Array<T>::RemoveAll()
 	{
 		throw out_of_range("Удалять нечего. Список пуст\n");
 	}
-	last_index = -1;
+	grow_size = -1;
 	mas.clear();
 }
 
@@ -49,7 +43,7 @@ void Array<T>::Append(const Array<T>& mas2) noexcept
 	//Метод insert() вставляет начиная с позиции, на которую указывает итератор pos,
 	//элементы из другого контейнера из диапазона между итераторами begin и end.
 	mas.insert(mas.end(), mas2.mas.begin(), mas2.mas.end());
-	last_index += mas2.last_index;
+	grow_size += mas2.grow_size;
 }
 
 template<class T>
@@ -60,7 +54,7 @@ Array<T>& Array<T>::operator=(const Array<T>& mas2) noexcept
 		return *this;
 	}
 	RemoveAll();
-	last_index = mas2.last_index;
+	grow_size = mas2.grow_size;
 	mas.insert(mas.begin(), mas2.mas.begin(), mas2.mas.end());
 
 	return *this;
@@ -81,6 +75,16 @@ T* const Array<T>::GetData() noexcept
 }
 
 template<class T>
+void Array<T>::Add(T value)noexcept
+{
+	if (mas.size() == GetUpperBound() + 1)
+	{
+		mas.resize(mas.size() + grow_size);
+	}
+	mas.push_back(value);
+}
+
+template<class T>
 void Array<T>::InsertAt(int index, T value) 
 {
 	if (index > mas.size() || index < 0)
@@ -90,7 +94,7 @@ void Array<T>::InsertAt(int index, T value)
 	auto pos = mas.begin();
 	advance(pos, index);
 	mas.insert(pos, value);
-	last_index++;
+	grow_size++;
 }
 
 template<class T>
@@ -105,7 +109,7 @@ void Array<T>::RemoveAt(int index)
 	//Метод erase() удаляет элементы из диапазона,
 	//на начало и конец которого указывают итераторы begin и end
 	mas.erase(pos);
-	last_index--;
+	grow_size--;
 }
 
 template<class T>
